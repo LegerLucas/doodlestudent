@@ -1,0 +1,15 @@
+FROM node:12 as build-step
+
+run apt-get update
+run apt install -y git
+
+run git clone https://github.com/LegerLucas/doodlestudent.git
+workdir 'doodlestudent/front'
+
+run npm install
+run npm run build
+
+FROM nginx as prod
+COPY --from=build-step /doodlestudent/front/dist/tlcfront /usr/share/nginx/html
+
+expose 80

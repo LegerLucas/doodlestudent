@@ -1,0 +1,14 @@
+from eclipse-temurin:17-alpine as build
+label stage = build
+
+run apk --no-cache add git
+run git clone https://github.com/LegerLucas/doodlestudent.git /app --depth=1
+workdir /app/api
+run ./mvnw clean package -Dquarkus.package.type=uber-jar
+
+from eclipse-temurin:17-jre-ubi9-minimal
+workdir /app
+copy --from=build /app/api/target/tlcdemoApp-1.0.0-SNAPSHOT-runner.jar /application.jar
+
+expose 8080
+cmd ["java", "-jar", "/app/application.jar", "-DdoodleinternalPadUrl=http://etherpad:9001/", "-Ddoodle.externalPadUrl=http://pad.tlc.fr:80/"]
